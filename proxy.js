@@ -2,28 +2,8 @@ const net = require('net')
 const packet = require('dns-packet');
 const dgram = require('dgram')
 const DnsCache = require('./dnscache');
-async function queryDns(buf) {
-	var sock = new PromiseSocket();
-	sock.setTimeout(5000)
-	await sock.connect({ host: '8.8.4.4', port: 53 });
-	var sizeBuffer = Buffer.allocUnsafe(2);
-	sizeBuffer.writeUInt16BE(buf.length);
-	await sock.write(sizeBuffer);
-	await sock.write(buf);
-	try {
-		sizeBuffer = await sock.read(2);
-		var ret = await sock.read(sizeBuffer.readUInt16BE(0));
-	}
-	catch (e) {
-		console.log(e)
-		return Buffer.alloc(0);
-	}
 
-	sock.end();
-	return ret;
-}
-
-function queryDns2(inbuf) {
+function queryDns(inbuf) {
 	return new Promise((resolve, reject) => {
 		let sizeBuffer;
 		let dataBuffer = Buffer.allocUnsafe(256);
@@ -89,6 +69,7 @@ function queryDns2(inbuf) {
 	});
 }
 
+
 const cache = new DnsCache();
 const server = dgram.createSocket('udp4');
 let lastId = -1;
@@ -105,15 +86,15 @@ server.on('message', (msg, rinfo) => {
 	let cachedResponse = cache.tryGetCache(query);
 	if (cachedResponse) {
 		for (let q of query.questions) {
-			console.log('[CACHE]query:', [q.name, q.type, q.class]);
+			//console.log('[CACHE]query:', [q.name, q.type, q.class]);
 		}
 		server.send(cachedResponse, rinfo.port, rinfo.address);
 	}
 	else {
 		for (let q of query.questions) {
-			console.log('[TCP]query:', [query.id, q.name, q.type, q.class]);
+			//console.log('[TCP]query:', [q.name, q.type, q.class]);
 		}
-		queryDns2(msg).then(ret => {
+		queryDns(msg).then(ret => {
 			cache.tryAddCache(query, ret);
 			server.send(ret, rinfo.port, rinfo.address)
 		}, err => {
