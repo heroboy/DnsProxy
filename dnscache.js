@@ -40,7 +40,7 @@ class DnsCache
 				if (isSameResponse(cache.parsedResponse, parsedResponse))
 				{
 					cache.cacheTime += CACHE_TIME;
-					cache.expired = Date.now() + CACHE_TIME;
+					cache.expired = Date.now() + cache.cacheTime;
 					this.cache[key] = cache;
 					delete this.expiredCache[key];
 					console.log('[ADD CACHE]', key, ',time:', this.cache[key].cacheTime / 1000);
