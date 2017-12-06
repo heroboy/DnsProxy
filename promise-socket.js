@@ -23,7 +23,7 @@ class PromiseSocket
 			}
 			this._processAwaiter();
 		});
-		s.on('close', () =>
+		s.on('close', (ee) =>
 		{
 			this._closed = true;
 			this._processAwaiter();

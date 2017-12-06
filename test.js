@@ -10,15 +10,16 @@ var buf = packet.encode({
 	}]
   })
 let conn = net.createConnection(53,'208.67.222.222');
+conn.setTimeout(5000);
+conn.setTimeout(0);
 conn.on('close',e=>{
 	console.log('close');
 });
 
 conn.on('data',data=>{
 	console.log(data);
-	conn.write(sizeBuf);
-	conn.write(buf);
 })
+
 let sizeBuf = new Buffer(2);
 sizeBuf.writeInt16BE(buf.length,0);
 conn.write(sizeBuf);
